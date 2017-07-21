@@ -39,4 +39,8 @@ namespace Display {
         return window->isOpen();
     }
 
+    sf::RenderWindow &getWindow() {
+        return *window;
+    }
+
 }

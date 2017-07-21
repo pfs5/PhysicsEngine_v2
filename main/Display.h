@@ -18,6 +18,8 @@ namespace Display {
 
     bool isOpen();
 
+    sf::RenderWindow &getWindow();
+
     constexpr uint16_t HEIGHT = 720;
     constexpr uint16_t WIDTH = 1208;
     const std::string TITLE = "Window";
