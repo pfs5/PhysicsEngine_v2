@@ -104,11 +104,11 @@ void PolygonShape::setMouseFollow(bool mouseFollow) {
 }
 
 RigidBody *PolygonShape::getRigidBody() {
-    return nullptr;
+    return m_rigidbody;
 }
 
 void PolygonShape::setRigidBody(RigidBody *rb) {
-
+    m_rigidbody = rb;
 }
 
 AABB *PolygonShape::getAABB() {
@@ -153,7 +153,11 @@ sf::Vector2f PolygonShape::getPoint(int index) {
 }
 
 void PolygonShape::move(sf::Vector2f distance) {
+    m_shape.setPosition(m_shape.getPosition() + distance);
+}
 
+sf::Vector2f PolygonShape::getPosition() {
+    return m_shape.getPosition();
 }
 
 void PolygonShape::setColor(sf::Color color) {

@@ -69,7 +69,7 @@ float checkSeparation (GameObject *a, GameObject *b, sf::Vector2f normal) {
 }
 
 // return value : positive = collision depth ; negative = no collision
-float narrowCollisionDetection (GameObject *a, GameObject *b) {
+float narrowCollisionDetection (GameObject *a, GameObject *b, sf::Vector2f &normal) {
     float minDistance = std::numeric_limits<float>::max();
 
     for (std::vector<sf::Vector2f>::iterator it = a->getNormals().begin(); it != a->getNormals().end(); it++) {
@@ -78,6 +78,7 @@ float narrowCollisionDetection (GameObject *a, GameObject *b) {
             return distance;
         } else if (distance < minDistance) {
             minDistance = distance;
+            normal = *it;
         }
     }
 
@@ -87,6 +88,7 @@ float narrowCollisionDetection (GameObject *a, GameObject *b) {
             return distance;
         } else if (distance < minDistance) {
             minDistance = distance;
+            normal = *it;
         }
     }
 
@@ -105,11 +107,25 @@ void collisionDetection(std::vector<GameObject*> objects) {
                 objects[j]->setColor(sf::Color::Red);
 
                 // Narrow phase
-                float distance = narrowCollisionDetection(objects[i], objects[j]);
+                sf::Vector2f normal;
+                float distance = narrowCollisionDetection(objects[i], objects[j], normal);
                 std::cout << distance << std::endl;
                 if (distance > 0) {
                     objects[i]->setColor(sf::Color::Cyan);
                     objects[j]->setColor(sf::Color::Cyan);
+
+                    // Move objects from collision. If one static, move one double the distance
+                    sf::Vector2f displacement = distance * normal;
+                    int orientation = (Util::dotProduct(objects[j]->getPosition() - objects[i]->getPosition(), normal) > 0) ? 1 : -1;
+                    float k1 = (objects[j]->getRigidBody()) ? (-orientation * 0.5f) : -orientation;
+                    float k2 = (objects[j]->getRigidBody()) ? (orientation * 0.5f) : orientation;
+
+                    if (objects[i]->getRigidBody()) {
+                        objects[i]->move(k1 * displacement);
+                    }
+                    if (objects[j]->getRigidBody()) {
+                        objects[j]->move(k2 * displacement);
+                    }
                 }
             } else {
                 objects[i]->setColor(sf::Color::White);
@@ -129,12 +145,13 @@ void update(std::vector<GameObject*> gameObjects, float dt) {
             sf::Vector2f velocity = rb->getVelocity();
 
             // Update position
-            float dy = 0.5f * Physics::Gravity * powf(dt, 2) + velocity.y * dt;
+            std::cout << (int) rb->hasGravity() << std::endl;
+            float dy = 0.5f * Physics::Gravity * powf(dt, 2) * (int) rb->hasGravity() + velocity.y * dt;
             float dx = velocity.x * dt;
             (*it)->move(sf::Vector2f(dx, dy));
 
             // Update velocity
-            velocity += sf::Vector2f (0.f, Physics::Gravity * dt);
+            velocity += sf::Vector2f (0.f, Physics::Gravity * dt * (int) rb->hasGravity());
             rb->setVelocity(velocity);
         }
 

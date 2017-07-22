@@ -23,6 +23,10 @@ void initObjects(Application &app) {
     poly2->setMouseFollow(true);
     app.addGameObject(poly2);
 
+    GameObject *poly3 = new PolygonShape(sf::Vector2f(600.f, 300.f), 100.f, 6);
+    poly3->setRigidBody(new RigidBody(0, false));
+    app.addGameObject(poly3);
+
 }
 
 int main() {

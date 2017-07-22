@@ -14,6 +14,7 @@ class PolygonShape: public GameObject {
     AABB m_aabbLocal;
     AABB m_aabbGlobal;
     std::vector<sf::Vector2f> m_normals;
+    RigidBody *m_rigidbody;
 
     bool m_mouseFollow;
     bool m_isAABBValid = false;
@@ -22,6 +23,7 @@ public:
     PolygonShape();
     PolygonShape(sf::Vector2f position, float radius, int n);
     PolygonShape(std::vector<sf::Vector2f> points);
+    ~PolygonShape() {delete m_rigidbody;};
 
     void input() override;
     void update(float dt) override;
@@ -40,6 +42,7 @@ public:
     sf::Vector2f getPoint(int index) override;
 
     void move(sf::Vector2f distance) override;
+    sf::Vector2f getPosition() override;
 
     void setColor(sf::Color color) override;
 };
