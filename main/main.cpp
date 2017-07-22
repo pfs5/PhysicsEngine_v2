@@ -9,7 +9,7 @@ void initObjects(Application &app) {
 //    rectangle1->setRigidBody(new RigidBody());
 //    app.addGameObject(rectangle1);
 
-    GameObject *poly1 = new PolygonShape(sf::Vector2f(300.f, 300.f), 50.f, 4);
+    GameObject *poly1 = new PolygonShape(sf::Vector2f(100.f, 100.f), 50.f, 4);
     app.addGameObject(poly1);
 
     std::vector<sf::Vector2f> points2;
@@ -23,10 +23,38 @@ void initObjects(Application &app) {
     poly2->setMouseFollow(true);
     app.addGameObject(poly2);
 
-    GameObject *poly3 = new PolygonShape(sf::Vector2f(600.f, 300.f), 100.f, 6);
-    poly3->setRigidBody(new RigidBody(0, false));
+    std::vector<sf::Vector2f> points3;
+    points3.push_back(sf::Vector2f (0.f, 0.f));
+    points3.push_back(sf::Vector2f (100.f, 0.f));
+    points3.push_back(sf::Vector2f (100.f, 100.f));
+    points3.push_back(sf::Vector2f (0.f, 100.f));
+    GameObject *poly3 = new PolygonShape(points3);
+    poly3->setRigidBody(new RigidBody());
+    poly3->move(sf::Vector2f(300.f, 100.f));
+    poly3->getRigidBody()->setGravity(true);
     app.addGameObject(poly3);
 
+    GameObject *poly4 = new PolygonShape(points3);
+    poly4->setRigidBody(new RigidBody());
+    poly4->move(sf::Vector2f(450.f, 100.f));
+    poly4->getRigidBody()->setGravity(true);
+    app.addGameObject(poly4);
+
+    GameObject *poly5 = new PolygonShape(points3);
+    poly5->setRigidBody(new RigidBody());
+    poly5->move(sf::Vector2f(450.f, 250.f));
+    poly5->getRigidBody()->setGravity(true);
+    app.addGameObject(poly5);
+
+    std::vector<sf::Vector2f> points6;
+    points6.push_back(sf::Vector2f (0.f, 0.f));
+    points6.push_back(sf::Vector2f (800.f, 0.f));
+    points6.push_back(sf::Vector2f (800.f, 100.f));
+    points6.push_back(sf::Vector2f (0.f, 100.f));
+    GameObject *poly6 = new PolygonShape(points6);
+    poly6->move(sf::Vector2f (100.f, 800.f));
+    poly6->setRigidBody(nullptr);
+    app.addGameObject(poly6);
 }
 
 int main() {

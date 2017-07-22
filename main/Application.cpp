@@ -109,7 +109,7 @@ void collisionDetection(std::vector<GameObject*> objects) {
                 // Narrow phase
                 sf::Vector2f normal;
                 float distance = narrowCollisionDetection(objects[i], objects[j], normal);
-                std::cout << distance << std::endl;
+                std::cout << "distance : " << distance << std::endl;
                 if (distance > 0) {
                     objects[i]->setColor(sf::Color::Cyan);
                     objects[j]->setColor(sf::Color::Cyan);
@@ -145,7 +145,6 @@ void update(std::vector<GameObject*> gameObjects, float dt) {
             sf::Vector2f velocity = rb->getVelocity();
 
             // Update position
-            std::cout << (int) rb->hasGravity() << std::endl;
             float dy = 0.5f * Physics::Gravity * powf(dt, 2) * (int) rb->hasGravity() + velocity.y * dt;
             float dx = velocity.x * dt;
             (*it)->move(sf::Vector2f(dx, dy));
