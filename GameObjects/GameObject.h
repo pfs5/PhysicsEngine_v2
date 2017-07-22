@@ -22,6 +22,9 @@ public:
     virtual void setRigidBody(RigidBody *rb) = 0;
 
     virtual AABB *getAABB () = 0;
+    virtual std::vector<sf::Vector2f> &getNormals() = 0;
+    virtual int getPointCount() = 0;
+    virtual sf::Vector2f getPoint (int index) = 0;
 
     virtual void move (sf::Vector2f distance) = 0;
 

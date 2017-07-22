@@ -123,6 +123,35 @@ AABB *PolygonShape::getAABB() {
     return &m_aabbGlobal;
 }
 
+std::vector<sf::Vector2f> calculateNormals(sf::ConvexShape &shape) {
+    std::vector<sf::Vector2f> normals;
+    for (int i=0; i<shape.getPointCount(); i++) {
+        sf::Vector2f direction = shape.getPoint((i + 1) % shape.getPointCount()) - shape.getPoint(i);
+        sf::Vector2f normal (-direction.y, direction.x);    // 90 degree rotation of direction
+        normal /= Util::magnitude(normal);
+        normals.push_back(normal);
+    }
+
+    return normals;
+}
+
+std::vector<sf::Vector2f> &PolygonShape::getNormals() {
+    if (!m_areNormalsValid) {
+        m_normals = calculateNormals(m_shape);
+        m_areNormalsValid = true;
+    }
+
+    return m_normals;
+}
+
+int PolygonShape::getPointCount() {
+    return m_shape.getPointCount();
+}
+
+sf::Vector2f PolygonShape::getPoint(int index) {
+    return m_shape.getPoint(index) + m_shape.getPosition();
+}
+
 void PolygonShape::move(sf::Vector2f distance) {
 
 }

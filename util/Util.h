@@ -9,13 +9,12 @@
 #include <iostream>
 
 namespace Util {
-    void printSFVector (sf::Vector2i v) {
-        std::cout << v.x << " " << v.y << std::endl;
-    }
+    void printSFVector (sf::Vector2i v);
 
-    void printSFVector (sf::Vector2f v) {
-        std::cout << v.x << " " << v.y << std::endl;
-    }
+    void printSFVector (sf::Vector2f v);
+
+    float dotProduct (sf::Vector2f v1, sf::Vector2f v2);
+    float magnitude (sf::Vector2f v);
 }
 
 #endif //PHYSICSENGINE2_UTIL_H

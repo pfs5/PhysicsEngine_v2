@@ -9,7 +9,7 @@ void initObjects(Application &app) {
 //    rectangle1->setRigidBody(new RigidBody());
 //    app.addGameObject(rectangle1);
 
-    GameObject *poly1 = new PolygonShape(sf::Vector2f(100.f, 100.f), 50.f, 5);
+    GameObject *poly1 = new PolygonShape(sf::Vector2f(300.f, 300.f), 50.f, 4);
     app.addGameObject(poly1);
 
     std::vector<sf::Vector2f> points2;
@@ -20,9 +20,9 @@ void initObjects(Application &app) {
     points2.push_back(sf::Vector2f (180.f, 230.f));
 
     GameObject *poly2 = new PolygonShape(points2);
-    poly2->setMouseFollow(true
-    );
+    poly2->setMouseFollow(true);
     app.addGameObject(poly2);
+
 }
 
 int main() {

@@ -6,6 +6,7 @@
 #include "Display.h"
 #include "../Physics/Physics.h"
 #include "../Physics/Collisions.h"
+#include "../util/Util.h"
 #include <SFML/System/Clock.hpp>
 #include <iostream>
 #include <cmath>
@@ -36,6 +37,63 @@ void input(std::vector<GameObject*> gameObjects) {
     }
 }
 
+float checkSeparation (GameObject *a, GameObject *b, sf::Vector2f normal) {
+    // Object a
+    float max_a = std::numeric_limits<float>::min();
+    float min_a = std::numeric_limits<float>::max();
+    for (int i=0; i<a->getPointCount(); i++) {
+        float projection = Util::dotProduct(a->getPoint(i), normal);
+        if (projection > max_a) {
+            max_a = projection;
+        }
+        if (projection < min_a) {
+            min_a = projection;
+        }
+    }
+
+    // Object b
+    float max_b = std::numeric_limits<float>::min();
+    float min_b = std::numeric_limits<float>::max();
+    for (int i=0; i<b->getPointCount(); i++) {
+        float projection = Util::dotProduct(b->getPoint(i), normal);
+        if (projection > max_b) {
+            max_b = projection;
+        }
+        if (projection < min_b) {
+            min_b = projection;
+        }
+    }
+
+    // Check separation
+    return fminf(max_a - min_b, max_b - min_a);
+}
+
+// return value : positive = collision depth ; negative = no collision
+float narrowCollisionDetection (GameObject *a, GameObject *b) {
+    float minDistance = std::numeric_limits<float>::max();
+
+    for (std::vector<sf::Vector2f>::iterator it = a->getNormals().begin(); it != a->getNormals().end(); it++) {
+        float distance = checkSeparation(a, b, *it);
+        if (distance <= 0) {
+            return distance;
+        } else if (distance < minDistance) {
+            minDistance = distance;
+        }
+    }
+
+    for (std::vector<sf::Vector2f>::iterator it = b->getNormals().begin(); it != b->getNormals().end(); it++) {
+        float distance = checkSeparation(a, b, *it);
+        if (distance <= 0) {
+            return distance;
+        } else if (distance < minDistance) {
+            minDistance = distance;
+        }
+    }
+
+
+    return minDistance;
+}
+
 void collisionDetection(std::vector<GameObject*> objects) {
     // Broad phase
     for (int i = 0; i < objects.size(); i++) {
@@ -45,6 +103,14 @@ void collisionDetection(std::vector<GameObject*> objects) {
             if (Collisions::AABBvsAABB(*a, *b)) {
                 objects[i]->setColor(sf::Color::Red);
                 objects[j]->setColor(sf::Color::Red);
+
+                // Narrow phase
+                float distance = narrowCollisionDetection(objects[i], objects[j]);
+                std::cout << distance << std::endl;
+                if (distance > 0) {
+                    objects[i]->setColor(sf::Color::Cyan);
+                    objects[j]->setColor(sf::Color::Cyan);
+                }
             } else {
                 objects[i]->setColor(sf::Color::White);
                 objects[j]->setColor(sf::Color::White);

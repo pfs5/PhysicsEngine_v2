@@ -13,9 +13,11 @@ class PolygonShape: public GameObject {
     sf::ConvexShape m_shape;
     AABB m_aabbLocal;
     AABB m_aabbGlobal;
+    std::vector<sf::Vector2f> m_normals;
 
     bool m_mouseFollow;
-    bool m_isAABBValid;
+    bool m_isAABBValid = false;
+    bool m_areNormalsValid = false;
 public:
     PolygonShape();
     PolygonShape(sf::Vector2f position, float radius, int n);
@@ -31,6 +33,11 @@ public:
     void setRigidBody(RigidBody *rb) override;
 
     AABB *getAABB() override;
+    std::vector<sf::Vector2f> &getNormals() override;
+
+    int getPointCount() override;
+
+    sf::Vector2f getPoint(int index) override;
 
     void move(sf::Vector2f distance) override;
 
