@@ -28,6 +28,8 @@ public:
     void setRigidBody(RigidBody *rb) override;
 
     void move(sf::Vector2f distance) override;
+
+
 };
 
 

@@ -25,6 +25,14 @@ public:
         shape.setOutlineThickness(1.f);
         shape.setOutlineColor(sf::Color::Green);
     };
+
+    void setPosition (sf::Vector2f position) {
+        pos = position;
+    }
+
+    sf::Vector2f getPosition () {
+        return pos;
+    }
 };
 
 #endif //PHYSICSENGINE2_AABB_H

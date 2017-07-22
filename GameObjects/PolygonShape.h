@@ -11,7 +11,8 @@
 
 class PolygonShape: public GameObject {
     sf::ConvexShape m_shape;
-    AABB m_aabb;
+    AABB m_aabbLocal;
+    AABB m_aabbGlobal;
 
     bool m_mouseFollow;
     bool m_isAABBValid;
@@ -32,6 +33,8 @@ public:
     AABB *getAABB() override;
 
     void move(sf::Vector2f distance) override;
+
+    void setColor(sf::Color color) override;
 };
 
 

@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "Display.h"
 #include "../Physics/Physics.h"
+#include "../Physics/Collisions.h"
 #include <SFML/System/Clock.hpp>
 #include <iostream>
 #include <cmath>
@@ -35,6 +36,23 @@ void input(std::vector<GameObject*> gameObjects) {
     }
 }
 
+void collisionDetection(std::vector<GameObject*> objects) {
+    // Broad phase
+    for (int i = 0; i < objects.size(); i++) {
+        AABB *a = objects[i]->getAABB();
+        for (int j = i + 1; j < objects.size(); j++) {
+            AABB *b = objects[j]->getAABB();
+            if (Collisions::AABBvsAABB(*a, *b)) {
+                objects[i]->setColor(sf::Color::Red);
+                objects[j]->setColor(sf::Color::Red);
+            } else {
+                objects[i]->setColor(sf::Color::White);
+                objects[j]->setColor(sf::Color::White);
+            }
+        }
+    }
+}
+
 void update(std::vector<GameObject*> gameObjects, float dt) {
     for (std::vector<GameObject*>::iterator it = gameObjects.begin(); it != gameObjects.end(); ++it)  {
         (*it)->update(dt);
@@ -53,6 +71,9 @@ void update(std::vector<GameObject*> gameObjects, float dt) {
             velocity += sf::Vector2f (0.f, Physics::Gravity * dt);
             rb->setVelocity(velocity);
         }
+
+        // Collision detection
+        collisionDetection(gameObjects);
     }
 }
 

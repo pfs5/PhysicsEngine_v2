@@ -59,7 +59,9 @@ PolygonShape::PolygonShape(sf::Vector2f position, float radius, int n) {
         m_shape.setPoint(i, sf::Vector2f(x, y));
     }
 
-    m_aabb = calculateAABB(m_shape);
+    m_aabbLocal = calculateAABB(m_shape);
+    m_aabbGlobal = m_aabbLocal;
+
     m_isAABBValid = true;
 }
 
@@ -72,7 +74,9 @@ PolygonShape::PolygonShape(std::vector<sf::Vector2f> points) {
         m_shape.setPoint(i, points[i] - points[0]);
     }
 
-    m_aabb = calculateAABB(m_shape);
+    m_aabbLocal = calculateAABB(m_shape);
+    m_aabbGlobal = m_aabbLocal;
+
     m_isAABBValid = true;
 }
 
@@ -90,7 +94,7 @@ void PolygonShape::update(float dt) {
 void PolygonShape::draw() {
     Display::draw(m_shape);
 
-    sf::RectangleShape aabbShape = m_aabb.shape;
+    sf::RectangleShape aabbShape = m_aabbLocal.shape;
     aabbShape.setPosition(aabbShape.getPosition() + m_shape.getPosition());
     Display::draw(aabbShape);
 }
@@ -109,13 +113,20 @@ void PolygonShape::setRigidBody(RigidBody *rb) {
 
 AABB *PolygonShape::getAABB() {
     if (!m_isAABBValid) {
-        m_aabb = calculateAABB(m_shape);
+        m_aabbLocal = calculateAABB(m_shape);
+        m_aabbGlobal = m_aabbLocal;
         m_isAABBValid = true;
     }
 
-    return &m_aabb;
+    m_aabbGlobal.setPosition(m_aabbLocal.getPosition() + m_shape.getPosition());
+
+    return &m_aabbGlobal;
 }
 
 void PolygonShape::move(sf::Vector2f distance) {
 
+}
+
+void PolygonShape::setColor(sf::Color color) {
+    m_shape.setOutlineColor(color);
 }

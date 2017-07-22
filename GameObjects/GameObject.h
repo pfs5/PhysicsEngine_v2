@@ -24,6 +24,8 @@ public:
     virtual AABB *getAABB () = 0;
 
     virtual void move (sf::Vector2f distance) = 0;
+
+    virtual void setColor (sf::Color color) = 0;
 };
 
 #endif //PHYSICSENGINE2_GAMEOBJECT_H
