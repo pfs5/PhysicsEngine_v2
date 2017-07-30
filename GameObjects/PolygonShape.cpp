@@ -9,10 +9,16 @@
 #include <cmath>
 #include <iostream>
 
+/**
+ * Initializes the shapes visual representation including color, thickness, ...
+ * @param shape Reference to shape
+ */
 void initializeShape(sf::ConvexShape &shape) {
     shape.setFillColor(sf::Color::Transparent);
     shape.setOutlineThickness(1.f);
     shape.setOutlineColor(sf::Color::White);
+
+    shape.setRotation(30.f);
 }
 
 AABB calculateAABB(sf::ConvexShape &shape) {
@@ -23,6 +29,8 @@ AABB calculateAABB(sf::ConvexShape &shape) {
 
     for (int i=0; i<shape.getPointCount(); i++) {
         sf::Vector2f p = shape.getPoint(i);
+        p = Util::rotatePoint(p, shape.getRotation());
+
         if (p.x < x_min) {
             x_min = p.x;
         }
@@ -68,11 +76,20 @@ PolygonShape::PolygonShape(sf::Vector2f position, float radius, int n) {
 PolygonShape::PolygonShape(std::vector<sf::Vector2f> points) {
     initializeShape(m_shape);
 
-    m_shape.setPosition(0.f, 0.f);
+    // Calculate center of mass for given points
+    sf::Vector2f centerOfMass {0.f, 0.f};
+    for (int i=0; i<points.size(); i++) {
+        centerOfMass += points[i];
+    }
+    centerOfMass /= (float) points.size();
+
+    // Initialize shape points. Move points so center of mass is at (0, 0)
+
     m_shape.setPointCount(points.size());
     for (int i=0; i<points.size(); i++) {
-        m_shape.setPoint(i, points[i] - points[0]);
+        m_shape.setPoint(i, points[i] - centerOfMass);
     }
+    m_shape.setPosition(centerOfMass);
 
     m_aabbLocal = calculateAABB(m_shape);
     m_aabbGlobal = m_aabbLocal;
@@ -128,6 +145,7 @@ std::vector<sf::Vector2f> calculateNormals(sf::ConvexShape &shape) {
     for (int i=0; i<shape.getPointCount(); i++) {
         sf::Vector2f direction = shape.getPoint((i + 1) % shape.getPointCount()) - shape.getPoint(i);
         sf::Vector2f normal (-direction.y, direction.x);    // 90 degree rotation of direction
+        normal = Util::rotatePoint(normal, shape.getRotation());
         normal /= Util::magnitude(normal);
         normals.push_back(normal);
     }
@@ -149,7 +167,9 @@ int PolygonShape::getPointCount() {
 }
 
 sf::Vector2f PolygonShape::getPoint(int index) {
-    return m_shape.getPoint(index) + m_shape.getPosition();
+    sf::Vector2f point {m_shape.getPoint(index)};
+    point = Util::rotatePoint(point, m_shape.getRotation());
+    return point + m_shape.getPosition();
 }
 
 void PolygonShape::move(sf::Vector2f distance) {
@@ -162,4 +182,13 @@ sf::Vector2f PolygonShape::getPosition() {
 
 void PolygonShape::setColor(sf::Color color) {
     m_shape.setOutlineColor(color);
+}
+
+void PolygonShape::rotate(float angle) {
+    if (fabsf(angle) < Util::ZERO_TRESH) {
+        return;
+    }
+    m_shape.rotate(angle);
+    m_isAABBValid = false;
+    m_areNormalsValid = false;
 }

@@ -37,9 +37,17 @@ void input(std::vector<GameObject*> gameObjects) {
     }
 }
 
+/**
+ * Checks separation in SAT for given normal.
+ * @param a First object
+ * @param b Second object
+ * @param normal Separation axis normal
+ * @return If positive - collision depth. If negative - no collision.
+ */
 float checkSeparation (GameObject *a, GameObject *b, sf::Vector2f normal) {
+
     // Object a
-    float max_a = std::numeric_limits<float>::min();
+    float max_a = -std::numeric_limits<float>::max();
     float min_a = std::numeric_limits<float>::max();
     for (int i=0; i<a->getPointCount(); i++) {
         float projection = Util::dotProduct(a->getPoint(i), normal);
@@ -52,7 +60,7 @@ float checkSeparation (GameObject *a, GameObject *b, sf::Vector2f normal) {
     }
 
     // Object b
-    float max_b = std::numeric_limits<float>::min();
+    float max_b = -std::numeric_limits<float>::max();
     float min_b = std::numeric_limits<float>::max();
     for (int i=0; i<b->getPointCount(); i++) {
         float projection = Util::dotProduct(b->getPoint(i), normal);
@@ -69,6 +77,15 @@ float checkSeparation (GameObject *a, GameObject *b, sf::Vector2f normal) {
 }
 
 // return value : positive = collision depth ; negative = no collision
+/**
+ * Performs SAT (separating axis theorem) collision detection for two given objects
+ * and, if colliding, returns collision depth and collision axis normal
+ *
+ * @param a First object
+ * @param b Second object
+ * @param normal Normal defining the collision axis, set by function
+ * @return Depth of collision as positive float number. If negative, there is no collision.
+ */
 float narrowCollisionDetection (GameObject *a, GameObject *b, sf::Vector2f &normal) {
     float minDistance = std::numeric_limits<float>::max();
 
@@ -96,6 +113,10 @@ float narrowCollisionDetection (GameObject *a, GameObject *b, sf::Vector2f &norm
     return minDistance;
 }
 
+void resolveCollision(GameObject *a, GameObject *b) {
+
+}
+
 void collisionDetection(std::vector<GameObject*> objects) {
     // Broad phase
     for (int i = 0; i < objects.size(); i++) {
@@ -106,10 +127,10 @@ void collisionDetection(std::vector<GameObject*> objects) {
                 objects[i]->setColor(sf::Color::Red);
                 objects[j]->setColor(sf::Color::Red);
 
-                // Narrow phase
+                // Narrow phase - Separating axis theorem
                 sf::Vector2f normal;
                 float distance = narrowCollisionDetection(objects[i], objects[j], normal);
-                std::cout << "distance : " << distance << std::endl;
+                //std::cout << "distance : " << distance << std::endl;
                 if (distance > 0) {
                     objects[i]->setColor(sf::Color::Cyan);
                     objects[j]->setColor(sf::Color::Cyan);
@@ -126,6 +147,9 @@ void collisionDetection(std::vector<GameObject*> objects) {
                     if (objects[j]->getRigidBody()) {
                         objects[j]->move(k2 * displacement);
                     }
+
+                    // Apply collision physics
+                    resolveCollision(objects[i], objects[j]);
                 }
             } else {
                 objects[i]->setColor(sf::Color::White);
@@ -152,6 +176,9 @@ void update(std::vector<GameObject*> gameObjects, float dt) {
             // Update velocity
             velocity += sf::Vector2f (0.f, Physics::Gravity * dt * (int) rb->hasGravity());
             rb->setVelocity(velocity);
+
+            // Update rotation
+            (*it)->rotate(rb->getAngularVelocity());
         }
 
         // Collision detection
@@ -159,14 +186,43 @@ void update(std::vector<GameObject*> gameObjects, float dt) {
     }
 }
 
-void draw(std::vector<GameObject*> gameObjects) {
+void draw(std::vector<GameObject*> &gameObjects, std::vector<sf::RectangleShape> &grid, bool drawGrid) {
+    // Draw reference grid
+    if (drawGrid) {
+        for (int i=0; i<grid.size(); i++) {
+            Display::draw(grid[i]);
+        }
+    }
+
     for (std::vector<GameObject*>::iterator it = gameObjects.begin(); it != gameObjects.end(); ++it)  {
         (*it)->draw();
     }
 }
 
-Application::Application() {
+Application::Application(): m_drawGrid{false} {
     Display::init();
+}
+
+Application::Application (bool drawGrid): m_drawGrid{drawGrid} {
+    Display::init();
+
+    // Initialize grid
+    // Vertical
+    sf::RectangleShape gridLine {sf::Vector2f(Grid::GRID_LINE_WIDTH, Display::HEIGHT)};
+
+    gridLine.setOutlineColor(sf::Color::Yellow);
+    gridLine.setFillColor(sf::Color::Yellow);
+
+    for (int i = Grid::GRID_SPACING; i < Display::WIDTH; i += Grid::GRID_SPACING) {
+        gridLine.setPosition(i, 0.f);
+        m_grid.push_back(gridLine);
+    }
+
+    gridLine.setSize(sf::Vector2f(Display::WIDTH, Grid::GRID_LINE_WIDTH));
+    for (int i = Grid::GRID_SPACING; i < Display::HEIGHT; i += Grid::GRID_SPACING) {
+        gridLine.setPosition(0.f, i);
+        m_grid.push_back(gridLine);
+    }
 }
 
 Application::~Application() {
@@ -202,7 +258,7 @@ void Application::runMainLoop() {
         }
 
         // Rendering
-        draw(m_gameObjects);
+        draw(m_gameObjects, m_grid, m_drawGrid);
 
         calculateFPS(true);
         Display::display();
